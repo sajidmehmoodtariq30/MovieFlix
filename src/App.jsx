@@ -3,6 +3,7 @@ import { useDebounce } from 'react-use';
 import Search from './components/Search.jsx';
 import Spinner from './components/Spinner.jsx'
 import MovieCard from './components/MovieCard.jsx';
+import { updateSearchCount } from './appwrite.js';
 
 const BaseURL = 'https://api.themoviedb.org/3/'
 
@@ -22,7 +23,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [debouncedSearchedTerm, setdebouncedSearchedTerm] = useState('')
 
-  useDebounce( () => setdebouncedSearchedTerm(searchTerm), 500, [searchTerm])
+  useDebounce( () => setdebouncedSearchedTerm(searchTerm), 1000, [searchTerm])
 
   const fetchMovies = async (query = '') => {
     try {
@@ -44,6 +45,10 @@ const App = () => {
         setErrorMessage("No Movies Found");
       } else {
         setMovieList(data.results);
+      }
+
+      if(query && data.result.length > 0) {
+        await updateSearchCount(query, data.result[0])
       }
       
     } catch (err) {
